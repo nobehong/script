@@ -1,0 +1,58 @@
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+
+-- Function to enable noclip for the player's character
+local function enableNoclip(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.PlatformStand = true -- Disable physics for the humanoid
+
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = false -- Disable collision for all parts of the character
+        end
+    end
+end
+
+-- Function to disable noclip
+local function disableNoclip(character)
+    local humanoid = character:WaitForChild("Humanoid")
+    humanoid.PlatformStand = false -- Re-enable physics for the humanoid
+
+    for _, part in ipairs(character:GetDescendants()) do
+        if part:IsA("BasePart") then
+            part.CanCollide = true -- Re-enable collision for all parts of the character
+        end
+    end
+end
+
+-- Function to teleport the player to the clicked position
+local function teleportToClickedPosition()
+    local character = player.Character or player.CharacterAdded:Wait()
+    local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+    -- Get the position where the mouse is pointing
+    local targetPosition = mouse.Hit.Position
+
+    -- Ensure the target position is valid and teleport the character
+    if humanoidRootPart then
+        humanoidRootPart.CFrame = CFrame.new(targetPosition)
+    end
+end
+
+-- Enable noclip when the script runs
+local character = player.Character or player.CharacterAdded:Wait()
+enableNoclip(character)
+
+-- Bind the teleport function to mouse click
+mouse.Button1Down:Connect(teleportToClickedPosition)
+
+-- Allow movement by re-enabling noclip when the player presses a key
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.Keyboard then
+        if input.KeyCode == Enum.KeyCode.E then -- Change 'E' to any key you want
+            disableNoclip(character) -- Disable noclip when 'E' is pressed
+        elseif input.KeyCode == Enum.KeyCode.Q then -- Change 'Q' to re-enable noclip
+            enableNoclip(character) -- Re-enable noclip when 'Q' is pressed
+        end
+    end
+end)
