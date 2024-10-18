@@ -1,0 +1,84 @@
+-- Variables for flying
+local flying = false
+local speed = 50 -- Adjust fly speed
+local flyKey = Enum.KeyCode.F -- Key to toggle flying
+
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local humanoidRootPart = player.Character:WaitForChild("HumanoidRootPart")
+local bodyGyro = Instance.new("BodyGyro")
+local bodyVelocity = Instance.new("BodyVelocity")
+
+-- Set up BodyGyro and BodyVelocity properties
+bodyGyro.P = 9e4
+bodyGyro.MaxTorque = Vector3.new(9e4, 9e4, 9e4)
+bodyGyro.CFrame = humanoidRootPart.CFrame
+bodyGyro.Parent = humanoidRootPart
+
+bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+bodyVelocity.MaxForce = Vector3.new(9e4, 9e4, 9e4)
+bodyVelocity.Parent = humanoidRootPart
+
+-- Fly toggle function
+local function toggleFly()
+    flying = not flying
+
+    if flying then
+        -- Enable flying
+        bodyGyro.MaxTorque = Vector3.new(9e4, 9e4, 9e4)
+        bodyVelocity.MaxForce = Vector3.new(9e4, 9e4, 9e4)
+        print("Fly mode activated")
+    else
+        -- Disable flying
+        bodyGyro.MaxTorque = Vector3.new(0, 0, 0)
+        bodyVelocity.MaxForce = Vector3.new(0, 0, 0)
+        print("Fly mode deactivated")
+    end
+end
+
+-- Fly movement control
+game:GetService("RunService").Stepped:Connect(function()
+    if flying then
+        -- Move the player with WASD and space for upward movement
+        local camera = workspace.CurrentCamera
+        local moveDirection = Vector3.new()
+
+        if player.Character and humanoidRootPart then
+            local forward = camera.CFrame.lookVector
+            local right = camera.CFrame.rightVector
+
+            moveDirection = Vector3.new()
+
+            -- Key-based movement
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
+                moveDirection = moveDirection + forward
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
+                moveDirection = moveDirection - forward
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
+                moveDirection = moveDirection - right
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
+                moveDirection = moveDirection + right
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.Space) then
+                moveDirection = moveDirection + Vector3.new(0, 1, 0)
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.LeftControl) then
+                moveDirection = moveDirection - Vector3.new(0, 1, 0)
+            end
+
+            -- Apply velocity based on movement direction
+            bodyVelocity.Velocity = moveDirection * speed
+            bodyGyro.CFrame = camera.CFrame
+        end
+    end
+end)
+
+-- Toggle flying on key press
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == flyKey then
+        toggleFly()
+    end
+end)
