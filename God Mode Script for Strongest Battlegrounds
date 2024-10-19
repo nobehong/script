@@ -1,0 +1,34 @@
+-- God Mode Script for Strongest Battlegrounds
+
+local player = game.Players.LocalPlayer
+
+-- Ensure the character is loaded
+local function onCharacterAdded(character)
+    local humanoid = character:WaitForChild("Humanoid")
+
+    -- Function to enable God Mode
+    local function enableGodMode()
+        humanoid.HealthChanged:Connect(function(health)
+            if health < humanoid.MaxHealth then
+                humanoid.Health = humanoid.MaxHealth  -- Reset health to max
+            end
+        end)
+        
+        humanoid.Died:Connect(function()
+            humanoid.Health = humanoid.MaxHealth  -- Revive if dead
+        end)
+
+        print("God Mode Enabled")
+    end
+
+    -- Enable God Mode when the character is added
+    enableGodMode()
+end
+
+-- Connect the function to the player's character
+player.CharacterAdded:Connect(onCharacterAdded)
+
+-- Check if the character already exists (if you respawned quickly)
+if player.Character then
+    onCharacterAdded(player.Character)
+end
