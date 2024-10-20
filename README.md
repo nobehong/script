@@ -8,3 +8,6 @@ Teleport is mouse click it is no off when execute it cant go off
 
 
 ray gun don`t kill player only on ur side they are dead they are not dead on there side so
+
+
+to fix teleprot if you go in the ground just reset
