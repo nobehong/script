@@ -1,0 +1,31 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+local hopping = false -- Variable to track the hopping state
+
+-- Function to make the player jump automatically
+local function autoHop()
+    while hopping do
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        wait(0.5) -- Adjust this value for hopping frequency
+    end
+end
+
+-- Key press detection
+local UserInputService = game:GetService("UserInputService")
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if input.KeyCode == Enum.KeyCode.H and not gameProcessedEvent then
+        hopping = not hopping -- Toggle the hopping state
+        if hopping then
+            autoHop()
+        end
+    end
+end)
+
+-- Restart Auto Hop on character respawn
+player.CharacterAdded:Connect(function(char)
+    character = char
+    humanoid = character:WaitForChild("Humanoid")
+end)
