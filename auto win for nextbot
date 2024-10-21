@@ -3,6 +3,7 @@ local character = player.Character or player.CharacterAdded:Wait()
 local humanoid = character:WaitForChild("Humanoid")
 
 local hopping = false -- Variable to track the hopping state
+local autoHopThread -- Thread for the auto hop loop
 
 -- Function to make the player jump automatically
 local function autoHop()
@@ -19,7 +20,8 @@ UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if input.KeyCode == Enum.KeyCode.H and not gameProcessedEvent then
         hopping = not hopping -- Toggle the hopping state
         if hopping then
-            autoHop()
+            autoHopThread = coroutine.create(autoHop) -- Create a new thread for auto hop
+            coroutine.resume(autoHopThread) -- Start the auto hop
         end
     end
 end)
