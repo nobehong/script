@@ -1,0 +1,29 @@
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Set your desired speed here (default is 16, adjust to your liking)
+local newSpeed = 50
+
+-- Function to change speed using a safer method
+local function changeSpeed()
+    if humanoid then
+        humanoid.WalkSpeed = newSpeed
+    end
+end
+
+-- Apply the speed immediately
+changeSpeed()
+
+-- Reapply speed if the player respawns
+player.CharacterAdded:Connect(function(char)
+    humanoid = char:WaitForChild("Humanoid")
+    changeSpeed()
+end)
+
+-- Reapply speed every time it gets reset by the game
+humanoid:GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+    if humanoid.WalkSpeed ~= newSpeed then
+        changeSpeed()
+    end
+end)
