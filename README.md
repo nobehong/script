@@ -11,3 +11,5 @@ ray gun don`t kill player only on ur side they are dead they are not dead on the
 
 
 to fix teleprot if you go in the ground just reset
+
+for the auto win it is B and spacebar
