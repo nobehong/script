@@ -1,33 +1,28 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:WaitForChild("Humanoid")
+-- Auto Bhop Script for Nextbot
+local UserInputService = game:GetService("UserInputService")
+local Player = game.Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+local isBhopEnabled = false
 
-local hopping = false -- Variable to track the hopping state
-local autoHopThread -- Thread for the auto hop loop
-
--- Function to make the player jump automatically
-local function autoHop()
-    while hopping do
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-        wait(0.5) -- Adjust this value for hopping frequency
-    end
+-- Function to toggle the auto-bhop
+function toggleBhop()
+    isBhopEnabled = not isBhopEnabled
+    print("Auto Bhop is now " .. (isBhopEnabled and "enabled" or "disabled"))
 end
 
--- Key press detection
-local UserInputService = game:GetService("UserInputService")
-
+-- Toggle auto-bhop with 'B' key
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if input.KeyCode == Enum.KeyCode.H and not gameProcessedEvent then
-        hopping = not hopping -- Toggle the hopping state
-        if hopping then
-            autoHopThread = coroutine.create(autoHop) -- Create a new thread for auto hop
-            coroutine.resume(autoHopThread) -- Start the auto hop
-        end
+    if not gameProcessedEvent and input.KeyCode == Enum.KeyCode.B then
+        toggleBhop()
     end
 end)
 
--- Restart Auto Hop on character respawn
-player.CharacterAdded:Connect(function(char)
-    character = char
-    humanoid = character:WaitForChild("Humanoid")
-end)
+-- Main loop
+while true do
+    wait(0.1) -- A slight wait to reduce CPU usage
+    if isBhopEnabled and Humanoid:GetState() == Enum.HumanoidStateType.Freefall then
+        -- Only jump if falling and not already jumping
+        Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end
