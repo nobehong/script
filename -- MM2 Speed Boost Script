@@ -1,0 +1,12 @@
+-- MM2 Speed Boost Script
+
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoid = char:WaitForChild("Humanoid")
+
+-- Boost settings
+local boostedSpeed = 40 -- boosted walk speed
+
+-- Apply the speed boost
+humanoid.WalkSpeed = boostedSpeed
+print("Speed boosted to:", boostedSpeed)
