@@ -15,3 +15,5 @@ to fix teleprot if you go in the ground just reset
 for the auto win it is B and spacebar
 
 for the speed for mm2 you need to execute every time you die
+
+check_xbox_motherboard is only for xbox 360
