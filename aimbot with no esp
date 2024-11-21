@@ -1,0 +1,67 @@
+local aimKey = Enum.KeyCode.E -- Key to toggle aimbot
+local aimEnabled = false
+local maxDistance = 300 -- Max distance for aiming
+local maxFOV = 60 -- Max Field of View for targeting
+
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+-- Toggle Aimbot
+game:GetService("UserInputService").InputBegan:Connect(function(input)
+    if input.KeyCode == aimKey then
+        aimEnabled = not aimEnabled
+        print("Aimbot " .. (aimEnabled and "Enabled" or "Disabled"))
+    end
+end)
+
+-- Check if a target is within the Field of View
+local function isTargetInFOV(targetPosition)
+    local direction = (targetPosition - camera.CFrame.Position).unit
+    local dot = camera.CFrame.LookVector:Dot(direction)
+    local angle = math.acos(dot) * (180 / math.pi)
+    return angle <= maxFOV
+end
+
+-- Get Closest Target (Excluding Teammates) and within distance & FOV
+local function getClosestTarget()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
+
+    for _, target in ipairs(game.Players:GetPlayers()) do
+        -- Ensure target is not the player, is alive, and not a teammate
+        if target ~= player and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+            if target.Team ~= player.Team then
+                local targetPos = target.Character.HumanoidRootPart.Position
+                local distance = (player.Character.HumanoidRootPart.Position - targetPos).Magnitude
+
+                -- Check if target is within distance and FOV
+                if distance <= maxDistance and isTargetInFOV(targetPos) then
+                    if distance < shortestDistance then
+                        closestPlayer = target
+                        shortestDistance = distance
+                    end
+                end
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+-- Aim at Target (Headshot Targeting)
+local function aimAt(target)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        -- Focus on the head for headshots
+        local targetHead = target.Character:FindFirstChild("Head")
+        local targetPos = targetHead and targetHead.Position or target.Character.HumanoidRootPart.Position
+        camera.CFrame = CFrame.new(camera.CFrame.Position, targetPos)
+    end
+end
+
+-- Main Loop (Runs every frame to update target and aim)
+game:GetService("RunService").RenderStepped:Connect(function()
+    if aimEnabled then
+        local target = getClosestTarget()
+        aimAt(target)
+    end
+end)
