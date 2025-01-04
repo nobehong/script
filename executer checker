@@ -1,0 +1,7 @@
+local executorName = identifyexecutor and identifyexecutor() or "Unknown"
+
+if executorName ~= "Unknown" then
+    print("You are using: " .. executorName)
+else
+    print("Executor detection not supported or failed.")
+end
