@@ -19,3 +19,5 @@ for the speed for mm2 you need to execute every time you die
 check_xbox_motherboard is only for xbox 360
 
 for the aimbot with no esp to Aimbot Toggl: Press E to enable or disable the aimbot and it should work in a lot of shoting games on roblox
+
+executer checker is to see what executer you useing
