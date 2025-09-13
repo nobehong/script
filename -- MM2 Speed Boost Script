@@ -1,12 +1,69 @@
--- MM2 Speed Boost Script
+-- NEXUS-PRIME v8.0 NL | MM2 Speed + Optimized Role ESP
 
-local player = game.Players.LocalPlayer
-local char = player.Character or player.CharacterAdded:Wait()
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local humanoid = char:WaitForChild("Humanoid")
 
--- Boost settings
-local boostedSpeed = 40 -- boosted walk speed
-
--- Apply the speed boost
+-- ===== SPEED BOOST =====
+local boostedSpeed = 40
 humanoid.WalkSpeed = boostedSpeed
 print("Speed boosted to:", boostedSpeed)
+
+-- ===== ROLE ESP CONFIG =====
+local roleColors = {
+    ["Murderer"] = Color3.fromRGB(255,0,0),
+    ["Sheriff"] = Color3.fromRGB(0,0,255)
+}
+
+local highlights = {} -- store created highlights
+
+local function getRole(player)
+    if player.Character then
+        local backpack = player:FindFirstChild("Backpack")
+        if backpack then
+            if backpack:FindFirstChild("Knife") or player.Character:FindFirstChild("Knife") then
+                return "Murderer"
+            elseif backpack:FindFirstChild("Gun") or player.Character:FindFirstChild("Gun") then
+                return "Sheriff"
+            end
+        end
+    end
+    return nil
+end
+
+local function createESP(character, color)
+    if character:FindFirstChild("HumanoidRootPart") and not highlights[character] then
+        local highlight = Instance.new("Highlight")
+        highlight.Adornee = character
+        highlight.FillColor = color
+        highlight.OutlineColor = Color3.fromRGB(0,0,0)
+        highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+        highlight.Parent = workspace
+        highlights[character] = highlight
+    end
+end
+
+-- Update ESP without creating duplicates
+RunService.RenderStepped:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer and player.Character then
+            local role = getRole(player)
+            if role and roleColors[role] then
+                createESP(player.Character, roleColors[role])
+                -- Update color if role changes
+                if highlights[player.Character] then
+                    highlights[player.Character].FillColor = roleColors[role]
+                end
+            end
+        end
+    end
+end)
+
+-- ===== NOTIFICATION =====
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "NEXUS-PRIME",
+    Text = "Speed Boost + Optimized Role ESP Active!",
+    Duration = 5
+})
