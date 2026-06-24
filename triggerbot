@@ -1,0 +1,92 @@
+local MAX_DISTANCE = 999999
+local AIM_PART = "HumanoidRootPart"
+local CHECK_VISIBILITY = false
+local SHOOT_WHILE_HOLDING = false
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Camera = Workspace.CurrentCamera
+
+local LocalPlayer = Players.LocalPlayer
+local Mouse = LocalPlayer:GetMouse()
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+local HOLDING_MOUSE = false
+
+local function isEnemy(player)
+    if player == LocalPlayer then return false end
+    local localTeam = LocalPlayer.Team
+    local targetTeam = player.Team
+    if not localTeam or not targetTeam then return true end
+    return localTeam ~= targetTeam
+end
+
+local function isVisible(targetPart)
+    if not CHECK_VISIBILITY or not targetPart then return true end
+    local origin = Camera.CFrame.Position
+    local direction = (targetPart.Position - origin).Unit * 1000
+    local ray = Ray.new(origin, direction)
+    local hit = Workspace:FindPartOnRayWithWhitelist(ray, {Character, targetPart.Parent}, true)
+    return hit == targetPart or (hit and hit:IsDescendantOf(targetPart.Parent))
+end
+
+local function getTargetPart(character)
+    if AIM_PART == "Head" then
+        return character:FindFirstChild("Head")
+    elseif AIM_PART == "Torso" then
+        return character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
+    else
+        return character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso") or character:FindFirstChild("Head")
+    end
+end
+
+local function getCharacter(part)
+    if not part then return nil end
+    return part:FindFirstAncestorOfClass("Model")
+end
+
+RunService.Heartbeat:Connect(function()
+    if SHOOT_WHILE_HOLDING and not UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
+        if HOLDING_MOUSE then
+            mouse1release()
+            HOLDING_MOUSE = false
+        end
+        return
+    end
+    
+    local target = Mouse.Target
+    
+    if target then
+        local character = getCharacter(target)
+        
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local targetPart = getTargetPart(character)
+            local targetPlayer = Players:GetPlayerFromCharacter(character)
+            
+            if targetPlayer and humanoid and humanoid.Health > 0 and targetPart and isEnemy(targetPlayer) then
+                local distance = (HumanoidRootPart.Position - targetPart.Position).Magnitude
+                
+                if distance <= MAX_DISTANCE and isVisible(targetPart) then
+                    if not HOLDING_MOUSE then
+                        mouse1press()
+                        HOLDING_MOUSE = true
+                    end
+                    return
+                end
+            end
+        end
+    end
+    
+    if HOLDING_MOUSE then
+        mouse1release()
+        HOLDING_MOUSE = false
+    end
+end)
+
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    HumanoidRootPart = newChar:WaitForChild("HumanoidRootPart")
+end)
